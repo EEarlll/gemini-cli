@@ -34,6 +34,7 @@ gemini -l 1000 -s "What is the capital of France?"
 - `-c, --clear`: Clear context history
 - `-s, --search`: Enable Google search
 - `-h, --help`: Display usage information
+- `-t, --thinking` : Use Google Thinking model
 
 ### Examples
 
@@ -49,6 +50,7 @@ cat << EOF | gemini
 > Long text....
 > EOF
 ```
+
 Note: `curl` and gemini API has a size and context size limitation.
 
 ## Script Details

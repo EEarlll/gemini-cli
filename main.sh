@@ -6,6 +6,7 @@ function cg(){
     echo -e "  \e[1;36m-l, --limit\e[0m     Set maximum output tokens (default: 2048)"
     echo -e "  \e[1;35m-c, --clear\e[0m     Clear context history"
     echo -e "  \e[1;33m-s, --search\e[0m    Enable Google search"	
+    echo -e "  \e[1;32m-t, --thinking\e[0m  Use the thinking model"
     exit 1
   }
 
@@ -15,6 +16,9 @@ function cg(){
   local context_file="/tmp/gemini-context.txt"
   local apikey="" # Add your API key here
   local query=""
+  local clearing=false
+  local thinking=false
+  local model="gemini-2.0-flash"
 
   if [[ -f "$context_file" ]]; then
   	context=$(cat "$context_file")
@@ -35,9 +39,15 @@ function cg(){
           usage
         fi
         ;;
+      -t|--thinking)
+        echo -e "\e[1;32mThinking Model.\e[0m"
+        thinking=true
+        shift
+        ;;
       -c|--clear)
         echo -e "\e[1;35mContext history cleared.\e[0m"
         context=""
+        clearing=true
         truncate -s 0 "$context_file"
         shift
         ;;
@@ -60,6 +70,15 @@ function cg(){
         ;;
     esac
   done
+  
+  if [[ "$thinking" == "true" ]]; then
+      model="gemini-2.0-flash-thinking-exp"
+      search=false
+  fi
+
+  if [[ -z "$query" && -t 0 && "$clearing" == "true" ]]; then
+    exit 0
+  fi
 
   if [[ -z "$query" && ! -t 0 ]]; then
     query=$(cat)
@@ -89,7 +108,7 @@ function cg(){
   local response=$(curl -s \
       -H 'Content-Type: application/json' \
       -d "$json_data" \
-      -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apikey")
+      -X POST "https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apikey")
 
   # echo "$response "| jq .
   # echo "$json_data"
