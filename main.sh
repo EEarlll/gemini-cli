@@ -60,6 +60,11 @@ function cg(){
         ;;
     esac
   done
+
+  if [[ -z "$query" && ! -t 0 ]]; then
+    query=$(cat)
+  fi
+
   local user_prompt="$context\nUser:$query"
   local escaped_user_prompt=$(echo "$user_prompt" | jq -sR .)
   local json_data="{
@@ -94,6 +99,8 @@ function cg(){
   echo -e "$user_prompt\nAssistant: $output_text" > "$context_file"
 
   local formatted_output=$(echo "$output_text" | sed -E 's/\*\*(.*?)\*\*/\\e[1;34m\1\\e[0m/g')
+  local formatted_output=$(echo "$formatted_output" | sed -E 's/\*/'"$(printf '\e[1;33m*\e[0m')"'/g')
+  
   echo -e "\e[4;31m<!-- Start of Response -->\e[0m"; echo
   echo -e "$(printf "$formatted_output")"; echo
 

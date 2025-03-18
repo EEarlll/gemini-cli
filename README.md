@@ -7,6 +7,26 @@ Gemini CLI is a command-line tool that interacts with the Gemini API to generate
 ```bash
 ./main.sh [options] query
 ```
+or add the function to your `.bashrc` file for easier access:
+
+```bash
+function gemini() {
+    /home/<user_name>/gemini-cli/main.sh "$@"
+}
+```
+
+restart bash
+
+```bash
+source ~/.bashrc
+```
+
+After adding the above function, you can use the `gemini` command from anywhere in your terminal:
+
+```bash
+gemini -l 1000 -s "What is the capital of France?"
+```
+
 
 ### Options
 
@@ -15,11 +35,21 @@ Gemini CLI is a command-line tool that interacts with the Gemini API to generate
 - `-s, --search`: Enable Google search
 - `-h, --help`: Display usage information
 
-### Example
+### Examples
 
 ```bash
 ./main.sh -l 1000 -s "What is the capital of France?"
 ```
+```bash
+gemini "Who is Bill Gates?" -s
+```
+```bash
+cat << EOF | gemini
+> Summarize:
+> Long text....
+> EOF
+```
+Note: `curl` and gemini API has a size and context size limitation.
 
 ## Script Details
 
