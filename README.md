@@ -30,11 +30,12 @@ gemini -l 1000 -s "What is the capital of France?"
 
 ### Options
 
-- `-l, --limit`: Set maximum output tokens (default: 2048)
+- `-l, --limit`: Set maximum output tokens (default: 8196)
 - `-c, --clear`: Clear context history
 - `-s, --search`: Enable Google search
 - `-h, --help`: Display usage information
 - `-t, --thinking` : Use Google Thinking model
+
 
 ### Examples
 
