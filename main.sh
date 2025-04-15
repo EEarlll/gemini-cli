@@ -20,6 +20,7 @@ function cg(){
     echo -e "\e[1;35mmodel = $model\e[0m"
     echo -e "\e[1;33msearch = $search\e[0m"
     echo -e "\e[1;32mthinking = $thinking\e[0m"
+    echo -e "\e[1;31mcurrent context size = $(wc -c /tmp/gemini-context.txt | awk '{print $1}')\e[0m"
     exit 1
   }
 
@@ -186,11 +187,18 @@ EOF
   esac
 
   json_data="$json_data}"
+  tempfile=$(mktemp)
+  printf '%s' "$json_data" > "$tempfile"
   local full_output_text=""
   local search_results_array=()
 
   # echo "$json_data"
-  echo -e "\e[4;31m<!-- Start of Response -->\e[0m"; echo
+  echo -e "\e[4;31m<!-- Start of Response -->\e[0m"; 
+  if [[ "$thinking" == "true" ]]; then
+    echo -e "\e[1;32mThinking...\e[0m"
+  fi
+  echo;
+  
   while IFS= read -r line; do
     if [[ $line == data:* ]]; then
       local json_chunk="${line#data: }"
@@ -220,12 +228,14 @@ EOF
     fi 
   done < <(curl -s \
       -H 'Content-Type: application/json' \
-      -d "$json_data" \
+      --data-binary @"$tempfile" \
       --no-buffer \
       -X POST "https://generativelanguage.googleapis.com/v1beta/models/$model:streamGenerateContent?alt=sse&key=$apikey")
   echo;
   if [[ "$search" == "true" ]]; then
     echo -e "\n\e[1;33mSearch Results:\e[0m"
+    readarray -t search_results_array < <(echo "${search_results_array[@]}")
+
     for result in "${search_results_array[@]}"; do
         local title=$(echo "$result" | awk '{print $1}')  
         local url=$(echo "$result" | awk '{$1=""; print $0}' | sed 's/^ *//') 
@@ -233,6 +243,7 @@ EOF
     done
   fi
   echo; echo -e "\e[4;31m<!-- End of Response -->\e[0m"
+  rm -f "$tempfile"
   echo -e "$user_prompt\nAssistant: $full_output_text" > "$context_file"
 }
 
